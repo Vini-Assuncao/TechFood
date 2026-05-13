@@ -1,128 +1,92 @@
-const PedidoRepository = require('../repositories/PedidoRepository')
-const ProdutoRepository = require('../repositories/ProdutoRepository')
+const PedidoRepository = require('../repositories/PedidoRepository');
+const ProdutoRepository = require('../repositories/ProdutoRepository');
 
 class PedidoService {
-    async listarPedidos() {
-        const listaPedidos = await PedidoRepository.listarTodosPedidos()
+    async criarPedido(pedidoData) {
+        const { cliente, itens } = pedidoData;
 
-        return {
-            sucesso: true,
-            dados: listaPedidos,
-            quantidade: listaPedidos.length
-        }
-    }
-
-    async buscarPorId(id) {
-        if (!id || isNaN(id) || id < 0) {
-            throw {
-                status: 400,
-                mensagem: "ID inválido"
-            }
+        if (!itens || itens.length === 0) {
+            throw new Error('O pedido deve conter ao menos um item.');
         }
 
-        const pedido = await PedidoRepository.buscarPorId(id)
+        let totalCalculado = 0;
+        const itensCompletos = [];
 
-        if (!pedido) {
-            throw {
-                status: 404,
-                mensagem: "Pedido não encontrado"
-            }
-        }
-
-        return {
-            sucesso: true,
-            dados: pedido
-        }
-    }
-
-    async cadastrarPedido(dados) {
-        const {cliente, produtos} = dados
-
-        if (!cliente || !produtos) {
-            throw {
-                status: 400,
-                mensagem: "Cliente e produtos são obrigatórios"
-            }
-        }
-
-        const custoPedido = 0
-
-        for (produto in produtos) {
-            if (!produto.id_produto || produto.quantidade === undefined) {
-                throw {
-                    status: 400,
-                    mensagem: "ID do produto e quantidade são obrigatórios"
-                }
+        for (const item of itens) {
+            if (!item.produto_id || !item.quantidade || item.quantidade <= 0) {
+                throw new Error('Cada item deve ter produto_id e quantidade maior que zero.');
             }
 
-            if (isNaN(produto.id_produto) || produto.id_produto < 0) {
-                throw {
-                    status: 400,
-                    mensagem: "ID do produto inválido"
-                }
+            const produto = await ProdutoRepository.findById(item.produto_id);
+            if (!produto) {
+                throw new Error(`Produto com ID ${item.produto_id} não encontrado.`);
             }
 
-            if (isNaN(produto.quantidade) || produto.quantidade <= 0) {
-                throw {
-                    status: 400,
-                    mensagem: "Quantidade deve ser um número positivo"
-                }
+            if (!produto.disponivel) {
+                throw new Error(`O produto ${produto.nome} está indisponível para pedidos.`);
             }
 
-            const produtoDados = await ProdutoRepository.buscarPorId(produto.id_produto)
+            const subtotal = produto.preco * item.quantidade;
+            totalCalculado += subtotal;
 
-            if (!produtoDados) {
-                throw {
-                    status: 404,
-                    mensagem: "Produto não encontrado"
-                }
-            }
-
-            if (!produtoDados.disponivel) {
-                throw {
-                    status: 400,
-                    mensagem: "Produto não disponível"
-                }
-            }
-
-            custoPedido += produtoDados.preco * produto.quantidade
+            itensCompletos.push({
+                produto_id: produto.id,
+                quantidade: item.quantidade,
+                preco_unitario: produto.preco
+            });
         }
 
         const novoPedido = {
             cliente,
-            status: "pendente",
-            total: custoPedido
-        }
+            status: 'pendente',
+            total: totalCalculado
+        };
+
+        const pedidoId = await PedidoRepository.create(novoPedido, itensCompletos);
+        return await PedidoRepository.findById(pedidoId);
     }
 
-    async atualizarPedido(id, dados) {
-
+    async listarPedidos() {
+        return await PedidoRepository.findAll();
     }
 
-    async deletarPedido(id) {
-        if (!id || isNaN(id) || id < 0) {
-            throw {
-                status: 400,
-                mensagem: "ID inválido"
-            }
-        }
-
-        const pedido = await PedidoRepository.buscarPorId(id)
-
+    async obterPedidoPorId(id) {
+        const pedido = await PedidoRepository.findById(id);
         if (!pedido) {
-            throw {
-                status: 404,
-                mensagem: "Pedido não encontrado"
-            }
+            throw new Error('Pedido não encontrado.');
+        }
+        return pedido;
+    }
+
+    async atualizarStatus(id, novoStatus) {
+        const statusValidos = ['pendente', 'preparo', 'pronto', 'entregue'];
+        if (!statusValidos.includes(novoStatus)) {
+            throw new Error(`Status inválido. Permitidos: ${statusValidos.join(', ')}`);
         }
 
-        await PedidoRepository.deletarPedidoPorId(id)
+        const pedidoExistente = await PedidoRepository.findById(id);
+        if (!pedidoExistente) {
+            throw new Error('Pedido não encontrado.');
+        }
 
-        return {
-            sucesso: true,
-            mensagem: "Pedido deletado com sucesso"
-        } 
+        const affectedRows = await PedidoRepository.update(id, { status: novoStatus });
+        if (affectedRows === 0) {
+            throw new Error('Não foi possível atualizar o status do pedido.');
+        }
+        return await PedidoRepository.findById(id);
+    }
+
+    async excluirPedido(id) {
+        const pedidoExistente = await PedidoRepository.findById(id);
+        if (!pedidoExistente) {
+            throw new Error('Pedido não encontrado.');
+        }
+
+        const affectedRows = await PedidoRepository.delete(id);
+        if (affectedRows === 0) {
+            throw new Error('Falha ao excluir pedido.');
+        }
     }
 }
 
-module.exports = new PedidoService()
+module.exports = new PedidoService();

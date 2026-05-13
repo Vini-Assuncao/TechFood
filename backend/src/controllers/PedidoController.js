@@ -1,70 +1,68 @@
-const PedidoService = require('../services/PedidoService')
+const PedidoService = require('../services/PedidoService');
 
 class PedidoController {
-    async listar(req, res) {
+    async create(req, res) {
         try {
-            const resultado = await PedidoService.listarPedidos()
-            res.status(200).json(resultado)
-        } catch (erro) {
-            res.status(500).json({
-                sucesso: false,
-                mensagem: erro.message || "Erro interno do servidor",
-                erro: erro
-            })
+            const pedido = await PedidoService.criarPedido(req.body);
+            res.status(201).json({
+                mensagem: 'Pedido criado com sucesso',
+                pedido
+            });
+        } catch (error) {
+            res.status(400).json({ erro: error.message });
         }
     }
 
-    async buscarPorId(req, res) {
+    async getAll(req, res) {
         try {
-            const resultado = await PedidoService.buscarPedidoPorId(req.params.id)
-            res.status(200).json(resultado)
-        } catch (erro) {
-            res.status(500).json({
-                sucesso: false,
-                mensagem: erro.mensagem || "Erro interno do servidor",
-                erro: erro
-            })
+            const pedidos = await PedidoService.listarPedidos();
+            res.status(200).json(pedidos);
+        } catch (error) {
+            res.status(500).json({ erro: 'Erro ao buscar pedidos', detalhe: error.message });
         }
     }
 
-    async cadastrar(req, res) {
+    async getById(req, res) {
         try {
-            const resultado = await PedidoService.cadastrarPedido(req.body)
-            res.status(201).json(resultado)
-        } catch (erro) {
-            res.status(500).json({
-                sucesso: false,
-                mensagem: erro.mensagem || "Erro interno do servidor",
-                erro: erro
-            })
+            const id = req.params.id;
+            const pedido = await PedidoService.obterPedidoPorId(id);
+            res.status(200).json(pedido);
+        } catch (error) {
+            res.status(404).json({ erro: error.message });
         }
     }
 
-    async atualizar(req, res) {
+    async updateStatus(req, res) {
         try {
-            const resultado = await PedidoService.atualizarPedido(req.params.id, req.body)
-            res.status(200).json(resultado)
-        } catch (erro) {
-            res.status(500).json({
-                sucesso: false,
-                mensagem: erro.mensagem || "Erro interno do servidor",
-                erro: erro
-            })
+            const id = req.params.id;
+            const { status } = req.body;
+            
+            if (!status) {
+                return res.status(400).json({ erro: 'O campo status é obrigatório.' });
+            }
+
+            const pedidoAtualizado = await PedidoService.atualizarStatus(id, status);
+            res.status(200).json({
+                mensagem: 'Status atualizado com sucesso',
+                pedido: pedidoAtualizado
+            });
+        } catch (error) {
+            // Se for erro de validação é 400, se não encontrou é 404
+            const code = error.message.includes('não encontrado') ? 404 : 400;
+            res.status(code).json({ erro: error.message });
         }
     }
 
-    async deletar(req, res) {
+    async delete(req, res) {
         try {
-            const resultado = await PedidoService.deletarPedido(req.params.id)
-            res.status(200).json(resultado)
-        } catch (erro) {
-            res.status(500).json({
-                sucesso: false,
-                mensagem: erro.mensagem || "Erro interno do servidor",
-                erro: erro
-            })
+            const id = req.params.id;
+            await PedidoService.excluirPedido(id);
+            res.status(200).json({ mensagem: 'Pedido excluído com sucesso' });
+        } catch (error) {
+            const code = error.message.includes('não encontrado') ? 404 : 400;
+            res.status(code).json({ erro: error.message });
         }
     }
 }
 
-module.exports = new PedidoController()
+module.exports = new PedidoController();

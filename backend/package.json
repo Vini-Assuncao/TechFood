@@ -1,26 +1,19 @@
 {
-  "name": "api-sabordigital",
+  "name": "somativa",
   "version": "1.0.0",
-  "description": "",
+  "description": "API Backend construída em Node.js com padrão de arquitetura MVC (Model-View-Controller) e banco de dados MySQL para o sistema de gestão da \"TechFood\" (Cardápios, Pedidos, Produtos).",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Vini-Assuncao/API-SaborDigital.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Vini-Assuncao/API-SaborDigital/issues"
-  },
-  "homepage": "https://github.com/Vini-Assuncao/API-SaborDigital#readme",
   "dependencies": {
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mysql2": "^3.22.2"
+    "mysql2": "^3.22.3"
   }
 }

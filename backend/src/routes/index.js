@@ -1,16 +1,22 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
 
-const produtoRoutes = require('./ProdutoRoutes')
-const pedidoRoutes = require('./PedidoRoutes')
+const produtoRoutes = require('./produtoRoutes');
+const cardapioRoutes = require('./cardapioRoutes');
+const pedidoRoutes = require('./pedidoRoutes');
 
+// Rota base (Root endpoint que estava em app.js)
 router.get('/', (req, res) => {
     res.json({
-        mensagem: "API SaborDigital",
-        versao: "1.0",
-        arquitetura: "MVC + SOLID"
-    })
-})
+        mensagem: "API TechFood funcionando 🍝",
+        versao: "1.0.0",
+        arquitetura: "MVC + SOLID (Refatorada)"
+    });
+});
 
-router.use('/produtos', produtoRoutes)
-router.use('/pedidos', pedidoRoutes)
+// Registrar domínios de rotas
+router.use('/produtos', produtoRoutes);
+router.use('/cardapios', cardapioRoutes);
+router.use('/pedidos', pedidoRoutes);
+
+module.exports = router;

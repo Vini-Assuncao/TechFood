@@ -1,149 +1,112 @@
-const ProdutoRepository = require("../repositories/ProdutoRepository")
+const ProdutoRepository = require('../repositories/ProdutoRepository');
 
 class ProdutoService {
     async listarProdutos() {
-        const listaProdutos = await ProdutoRepository.listarTodosProdutos()
-
+        const produtos = await ProdutoRepository.findAll();
         return {
             sucesso: true,
-            dados: listaProdutos,
-            quantidade: listaProdutos.length
-        }
+            dados: produtos,
+            total: produtos.length
+        };
     }
 
     async buscarProdutoPorId(id) {
-        if (!id || isNaN(id) || id < 0) {
-            throw {
-                status: 400,
-                mensagem: "ID inválido"
-            }
+        if (!id || isNaN(id)) {
+            throw { status: 400, mensagem: "ID inválido" };
         }
 
-        const produto = await ProdutoRepository.buscarPorId(id)
-
+        const produto = await ProdutoRepository.findById(id);
         if (!produto) {
-            throw {
-                status: 404,
-                mensagem: "Produto não encontrado"
-            }
+            throw { status: 404, mensagem: "Produto não encontrado" };
         }
 
         return {
             sucesso: true,
             dados: produto
-        }
+        };
     }
 
     async cadastrarProduto(dados) {
-        const {nome, descricao, preco, categoria, disponivel} = dados
+        const { nome, descricao, preco, categoria, disponivel } = dados;
 
         if (!nome || !descricao || preco === undefined) {
-            throw {
-                status: 400,
-                mensagem: "Nome, descrição e preço são obrigatórios"
-            }
+            throw { status: 400, mensagem: "Nome, descrição e preço são obrigatórios" };
         }
 
-        if (isNaN(preco) || preco <= 0) {
-            throw {
-                status: 400,
-                mensagem: "Preço deve ser um número positivo"
-            }
+        if (typeof preco !== "number" || preco <= 0) {
+            throw { status: 400, mensagem: "Preço deve ser um número positivo" };
         }
 
         const novoProduto = {
             nome: nome.trim(),
             descricao: descricao.trim(),
             preco,
-            categoria: categoria.trim() || null,
+            categoria: categoria || null,
             disponivel: disponivel ?? true
-        }
+        };
 
-        const id = await ProdutoRepository.cadastrarNovoProduto(novoProduto)
+        const id = await ProdutoRepository.create(novoProduto);
 
         return {
             sucesso: true,
-            mensagem: "Produto cadastrado",
-            produto: novoProduto,
+            mensagem: "Produto cadastrado com sucesso",
             id
-        }
+        };
     }
 
     async atualizarProduto(id, dados) {
-        if (!id || isNaN(id) || id < 0) {
-            throw {
-                status: 400,
-                mensagem: "ID inválido"
-            }
+        if (!id || isNaN(id)) {
+            throw { status: 400, mensagem: "ID inválido" };
         }
 
-        const produto = await ProdutoRepository.buscarPorId(id)
-
-        if (!produto) {
-            throw {
-                status: 404,
-                mensagem: "Produto não encontrado"
-            }
+        const existe = await ProdutoRepository.findById(id);
+        if (!existe) {
+            throw { status: 404, mensagem: "Produto não encontrado" };
         }
 
-        const produtoAtualizado = {}
-        const {nome, descricao, preco, categoria, disponivel} = dados
+        const atualizado = {};
+        const { nome, descricao, preco, categoria, disponivel } = dados;
 
-        if (nome !== undefined) produtoAtualizado.nome = nome.trim()
-        if (descricao !== undefined) produtoAtualizado.descricao = descricao.trim()
+        if (nome !== undefined) atualizado.nome = nome.trim();
+        if (descricao !== undefined) atualizado.descricao = descricao.trim();
         if (preco !== undefined) {
-            if (isNaN(preco) || preco <= 0) {
-                throw {
-                    status: 400,
-                    mensagem: "Preço deve ser um número positivo"
-                }
+            if (typeof preco !== "number" || preco <= 0) {
+                throw { status: 400, mensagem: "Preço deve ser um número positivo" };
             }
-            else {
-                produtoAtualizado.preco = preco
-            }
+            atualizado.preco = preco;
         }
-        if (categoria !== undefined) produtoAtualizado.categoria = categoria.trim()
-        if (disponivel !== undefined) produtoAtualizado.disponivel = disponivel
+        if (categoria !== undefined) atualizado.categoria = categoria;
+        if (disponivel !== undefined) atualizado.disponivel = disponivel;
 
-        if (Object.keys(produtoAtualizado).length == 0) {
-            throw {
-                status: 400,
-                mensagem: "Nenhum dado a atualizar"
-            }
+        if (Object.keys(atualizado).length === 0) {
+            throw { status: 400, mensagem: "Nenhum dado válido enviado para atualização" };
         }
 
-        await ProdutoRepository.atualizarProdutoPorId(id, produtoAtualizado)
+        await ProdutoRepository.update(id, atualizado);
 
         return {
             sucesso: true,
             mensagem: "Produto atualizado com sucesso"
-        }
+        };
     }
 
     async deletarProduto(id) {
-        if (!id || isNaN(preco) || preco <= 0) {
-            throw {
-                status: 400,
-                mensagem: "ID inválido"
-            }
+        if (!id || isNaN(id)) {
+            throw { status: 400, mensagem: "ID inválido" };
         }
 
-        const produto = await ProdutoRepository.buscarProdutoPorId(id)
-
-        if (!produto) {
-            throw {
-                status: 404,
-                mensagem: "Produto não encontrado"
-            }
+        const existe = await ProdutoRepository.findById(id);
+        if (!existe) {
+            throw { status: 404, mensagem: "Produto não encontrado" };
         }
 
-        await ProdutoRepository.deletarProdutoPorId(id)
+        await ProdutoRepository.delete(id);
 
         return {
             sucesso: true,
-            mensagem: "Produto deletado com sucesso"
-        }
+            mensagem: "Produto apagado com sucesso"
+        };
     }
 }
 
-module.exports = new ProdutoService()
+module.exports = new ProdutoService();
