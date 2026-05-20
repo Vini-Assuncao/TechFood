@@ -1,33 +1,73 @@
 document.addEventListener("DOMContentLoaded", function () {
-  inicializarSubtotal();
+  renderizarCardapio()
+//  inicializarSubtotal();
   inicializarHoverCards();
   inicializarVitrine();
 });
 
-function inicializarSubtotal() {
-  const inputQtd = document.querySelector("#qtd-lasanha");
-  const precoTexto = document.querySelector("#preco-lasanha");
-  const subTexto = document.querySelector("#sub-lasanha");
+// INSERIDA NA RENDERIZAR CARDÁPIO
+//
+// function inicializarSubtotal() {
+//   const inputQtd = document.querySelector("#qtd-lasanha");
+//   const precoTexto = document.querySelector("#preco-lasanha");
+//   const subTexto = document.querySelector("#sub-lasanha");
+//
+//   if (!inputQtd || !precoTexto) return;
+//
+//   inputQtd.addEventListener("input", function () {
+//     const precoUnitario = 45.0;
+//     const quantidade = Number(inputQtd.value);
+//
+//     if (isNaN(quantidade) || quantidade < 1) return;
+//
+//     const total = quantidade * precoUnitario;
+//     precoTexto.textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+//     precoTexto.style.color = total > 150 ? "#c0392b" : "#e67e22";
+//
+//     if (subTexto) {
+//       subTexto.textContent =
+//         quantidade > 1
+//           ? `${quantidade}x R$ ${precoUnitario.toFixed(2).replace(".", ",")}`
+//           : "";
+//     }
+//   });
+// }
 
-  if (!inputQtd || !precoTexto) return;
+async function renderizarCardapio() {
+  const grid = document.querySelector("#grid-cardapio")
+  
+  if (!grid) return
 
-  inputQtd.addEventListener("input", function () {
-    const precoUnitario = 45.0;
-    const quantidade = Number(inputQtd.value);
+  grid.innerHTML = "<p class='loading'>Carregando cardápio...</p>"
 
-    if (isNaN(quantidade) || quantidade < 1) return;
+  try {
+    const produtos = await buscarProdutos()
+    grid.innerHTML = ""
 
-    const total = quantidade * precoUnitario;
-    precoTexto.textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
-    precoTexto.style.color = total > 150 ? "#c0392b" : "#e67e22";
+    produtos.forEach((produto) => {
+      const card = document.createElement("article")
+      card.classList.add("card")
+      card.setAttribute("data-id", produto.id)
 
-    if (subTexto) {
-      subTexto.textContent =
-        quantidade > 1
-          ? `${quantidade}x R$ ${precoUnitario.toFixed(2).replace(".", ",")}`
-          : "";
-    }
-  });
+      card.innerHTML = 
+        `<h3>${produto.nome}</h3>` +
+        `<p class="desc">${produto.descricao}</p>` +
+        `<div class="quantidade-box">` +
+          `<button class="btn-qtd btn-menos">-</button>` +
+          `<span class="qtd-valor">1</span>` +
+          `<button class="btn-qtd btn-mais">+</button>` +
+        `</div>` +
+        `<span class='preco' data-preco='${produto.preco}'>` +
+          `R$ ${produto.preco.toFixed(2).replace(".", ",")}` +
+        `</span>` +
+        `<button class="btn-pedido">Pedir Agora</button>`
+
+      grid.appendChild(card)
+    })
+  }
+  catch (error) {
+    grid.innerHTML = `<p class='loading-error'>Erro ao carregar o cardápio. Verifique se o servidor está rodando.</p>`
+  }
 }
 
 function inicializarHoverCards() {
@@ -46,79 +86,45 @@ function inicializarHoverCards() {
 
 function inicializarVitrine() {
   const main = document.querySelector("main");
-
   if (!main) return;
 
-  main.addEventListener("click", (event) => {
+  main.addEventListener("click", function (event) {
     const clicado = event.target;
 
-    // Adicionar e remover quantidade itens
+    // ── Botão MENOS — idêntico à Aula 8 ─────────────────────────────────────
     if (clicado.classList.contains("btn-menos")) {
-      const box = clicado.parentElement;
+      const box    = clicado.parentElement;
       const spanQtd = box.querySelector(".qtd-valor");
-      const valorAtual = Number(spanQtd.textContent);
-      spanQtd.textContent = Math.max(1, valorAtual - 1);
+      spanQtd.textContent = Math.max(1, Number(spanQtd.textContent) - 1);
       atualizarPrecoCard(box);
       return;
     }
 
+    // ── Botão MAIS — idêntico à Aula 8 ──────────────────────────────────────
     if (clicado.classList.contains("btn-mais")) {
-      const box = clicado.parentElement;
+      const box    = clicado.parentElement;
       const spanQtd = box.querySelector(".qtd-valor");
       spanQtd.textContent = Number(spanQtd.textContent) + 1;
       atualizarPrecoCard(box);
       return;
     }
 
-    // Solicitar pedido - Item
-
+    // ── Botão PEDIR AGORA ────────────────────────────────────────────────────
     if (clicado.classList.contains("btn-pedido")) {
       event.preventDefault();
 
       const card = clicado.parentElement;
-      const nomePrato = card.querySelector("h3").textContent;
+
+      // ⚠ Aula 9: lê o data-id do card (produto_id do banco)
+      // adicionado por renderizarCardapio() — não existe mais data-nome
+      const produtoId = Number(card.getAttribute("data-id"));
       const quantidade = Number(card.querySelector(".qtd-valor").textContent);
-      const precoExibido = parseFloat(card.querySelector(".preco").getAttribute("data-preco"));
 
-      clicado.textContent = "✔ Adicionado";
-      clicado.style.backgroundColor = "#27ae60";
-      clicado.disabled = true;
-
-      setTimeout(() => {
-        clicado.textContent = "Pedir Agora";
-        clicado.style.backgroundColor = "";
-        clicado.disabled = false;
-
-        const box = card.querySelector(".quantidade-box");
-        if (box) {
-          const spanQtd = box.querySelector(".qtd-valor");
-          if (spanQtd > 0) spanQtd.textContent = "1";
-          atualizarPrecoCard(box);
-        }
-      }, 1500);
-
-      const badgeExistente = card.querySelector(".badge-adicionado");
-
-      if (badgeExistente) badgeExistente.remove()      
-     
-      card.insertAdjacentHTML(
-        "beforeend",
-        "<span class='badge-adicionado'> ✔ No resumo</span>",
-      );
-
-      setTimeout(function(){
-        const badge = card.querySelector(".badge-adicionado")
-
-        if(badge) badge.remove()
-      }, 2000)
-
-      // função que enviará as informações ao WebStorage
-      salvarPedido({nome: nomePrato, preco: precoExibido, qtd: quantidade});
-      atualizarContadorPedidos()
-
-    } // fechamento btn-pedido
-  }); // fechamento do ouvinte
+      salvarPedido(produtoId, quantidade, clicado);
+    }
+  });
 }
+
 
 function atualizarPrecoCard(box) {
   const card = box.parentElement;
