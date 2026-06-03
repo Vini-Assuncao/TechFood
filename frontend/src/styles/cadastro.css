@@ -1,0 +1,112 @@
+/* ==================================================
+   CADASTRO DE PRATOS
+   Utiliza as variáveis do global.css
+   ================================================== */
+
+.secao-cadastro {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+#form-cadastro-prato {
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+  border: 2px solid #ececec;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.grupo-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.grupo-form label {
+  font-weight: bold;
+  color: var(--cor-primaria);
+  margin-bottom: 8px;
+}
+
+.grupo-form input,
+.grupo-form textarea,
+.grupo-form select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.2s;
+}
+
+.grupo-form input:focus,
+.grupo-form textarea:focus,
+.grupo-form select:focus {
+  border-color: var(--cor-destaque);
+}
+
+.grupo-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.linha-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.btn-salvar {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--cor-destaque);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-salvar:hover {
+  background: #d35400;
+  transform: translateY(-1px);
+}
+
+.btn-salvar:active {
+  transform: translateY(0);
+}
+
+input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+input[type="file"]:hover {
+  border-color: var(--cor-destaque);
+}
+
+#preview-imagem {
+  margin-top: 15px;
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+}
+
+@media screen and (max-width: 600px) {
+  .linha-form {
+    grid-template-columns: 1fr;
+  }
+
+  #form-cadastro-prato {
+    padding: 20px;
+  }
+}
