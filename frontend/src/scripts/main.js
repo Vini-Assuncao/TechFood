@@ -42,9 +42,11 @@ async function renderizarCardapio() {
 
   try {
     const produtos = await buscarProdutos()
+    console.log(produtos)
+    console.log(Array.isArray(produtos))
     grid.innerHTML = ""
 
-    produtos.forEach((produto) => {
+    produtos.dados.forEach((produto) => {
       const card = document.createElement("article")
       card.classList.add("card")
       card.setAttribute("data-id", produto.id)
@@ -58,7 +60,7 @@ async function renderizarCardapio() {
           `<button class="btn-qtd btn-mais">+</button>` +
         `</div>` +
         `<span class='preco' data-preco='${produto.preco}'>` +
-          `R$ ${produto.preco.toFixed(2).replace(".", ",")}` +
+          `R$ ${Number(produto.preco).toFixed(2).replace(".", ",")}` +
         `</span>` +
         `<button class="btn-pedido">Pedir Agora</button>`
 
@@ -66,7 +68,10 @@ async function renderizarCardapio() {
     })
   }
   catch (error) {
-    grid.innerHTML = `<p class='loading-error'>Erro ao carregar o cardápio. Verifique se o servidor está rodando.</p>`
+    console.error(error);
+
+    grid.innerHTML =
+      `<p class='loading-error'>${error.message}</p>`;
   }
 }
 
@@ -133,7 +138,7 @@ function atualizarPrecoCard(box) {
   const quantidade = Number(box.querySelector(".qtd-valor").textContent);
   const total = precoUnitario * quantidade;
 
-  spanPreco.textContent = "R$" + total.toFixed(2).replace(".", ",");
+  spanPreco.textContent = "R$" + Number(total.toFixed(2).replace(".", ","));
   spanPreco.style.color = total > 150 ? "#c0392b" : "#e67e22";
 }
 
