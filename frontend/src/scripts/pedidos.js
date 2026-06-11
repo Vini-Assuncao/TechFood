@@ -31,7 +31,7 @@ function renderizarPedidos() {
     li.classList.add("item-pedido")
 
     const textoSpan = document.createElement("span")
-    textoSpan.innerHTML = `<strong> ${pedido.nome} </strong> - ${pedido.qtd} x R$${pedido.preco.toFixed(2).replace(".", ",")} <span class="subtotal-item"> R$${pedido.subtotal.toFixed(2).replace(".", ",")}</span>`
+    textoSpan.innerHTML = `<strong> ${pedido.nome} </strong> - ${pedido.quantidade} x R$${pedido.preco.toFixed(2).replace(".", ",")} <span class="subtotal-item"> R$${pedido.subtotal.toFixed(2).replace(".", ",")}</span>`
 
     const btnRemover = document.createElement("button")
     btnRemover.textContent = "❌"
@@ -54,7 +54,7 @@ function renderizarPedidos() {
   if (spanResumo) spanResumo.textContent = totalFormatado
   
   const totalItens = pedidos.reduce(function(acc, p) {
-    return acc + p.qtd
+    return acc + p.quantidade
   }, 0)
   if (spanContador) {
     spanContador.textContent = `${totalItens} ${totalItens === 1 ? "item" : "itens"}`

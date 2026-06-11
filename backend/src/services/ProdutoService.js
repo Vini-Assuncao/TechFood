@@ -29,12 +29,16 @@ class ProdutoService {
     async cadastrarProduto(dados) {
         const { nome, descricao, preco, categoria, disponivel, imagem } = dados;
 
-        if (!nome || !descricao || preco === undefined) {
-            throw { status: 400, mensagem: "Nome, descrição e preço são obrigatórios" };
+        if (!nome || !descricao || preco === undefined || !imagem) {
+            throw { status: 400, mensagem: "Nome, descrição, preço e imagem são obrigatórios" };
         }
 
         if (typeof preco !== "number" || preco <= 0) {
             throw { status: 400, mensagem: "Preço deve ser um número positivo" };
+        }
+
+        if (!imagem.startsWith("data:image")) {
+            throw { status: 400, mensagem: "Imagem inválida" }
         }
 
         const novoProduto = {
@@ -43,7 +47,7 @@ class ProdutoService {
             preco,
             categoria: categoria || null,
             disponivel: disponivel ?? true,
-            imagem: imagem || null
+            imagem: imagem
         };
 
         const id = await ProdutoRepository.create(novoProduto);

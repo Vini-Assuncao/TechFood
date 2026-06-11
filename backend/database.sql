@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS produto (
     preco DECIMAL(10, 2) NOT NULL,
     categoria VARCHAR(50) DEFAULT NULL,
     disponivel BOOLEAN DEFAULT TRUE,
-    imagem TEXT DEFAULT NULL,
+    imagem LONGTEXT NOT NULL,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -56,10 +56,3 @@ CREATE TABLE IF NOT EXISTS item_pedido (
     FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produto(id) ON DELETE RESTRICT
 );
-
--- População inicial (Opcional)
-INSERT INTO produto (nome, descricao, preco, categoria, disponivel) VALUES 
-('Espaguete à Bolonhesa', 'Massa com molho de tomate e carne moída', 35.50, 'Massa', true),
-('Lasanha de Frango', 'Lasanha com frango desfiado e queijo', 42.00, 'Massa', true),
-('Pizza Margherita', 'Pizza de mussarela, tomate e manjericão', 50.00, 'Pizza', true),
-('Suco de Laranja', 'Suco natural 500ml', 12.00, 'Bebida', true);

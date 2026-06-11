@@ -1,6 +1,6 @@
-# Documentação da API - Cantina Bella Vita
+# Documentação da API - TechFood
 
-Esta documentação é destinada à equipe de frontend para integração com a API da Cantina Bella Vita. 
+Esta documentação é destinada à equipe de frontend para integração com a API do TechFood
 A API Rest fornece endpoints completos para gerenciar **Produtos**, **Cardápios** e **Pedidos**.
 
 > **Base URL:** `http://localhost:3000` (ou a URL de produção/homologação quando disponível) \
@@ -15,7 +15,7 @@ Retorna o status atual da aplicação.
 **Resposta de Sucesso (200 OK):**
 ```json
 {
-    "mensagem": "API Cantina Bella Vita funcionando 🍝",
+    "mensagem": "API TechFood funcionando 🍝",
     "versao": "1.0.0",
     "arquitetura": "MVC + SOLID (Refatorada)"
 }

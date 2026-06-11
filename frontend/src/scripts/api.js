@@ -67,3 +67,19 @@ async function atualizarPedido(id, novoStatus) {
 
     return dados
 }
+
+async function cadastrarProduto(produto) {
+    const response = await fetch(`${BATE_API_URL}/produtos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(produto)
+    })
+
+    const dados = await response.json()
+
+    if (!response.ok) {
+        throw new Error(dados.erro || `Erro ${response.status}`)
+    }
+    
+    return dados
+}

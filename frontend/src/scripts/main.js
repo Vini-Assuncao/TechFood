@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   renderizarCardapio()
 //  inicializarSubtotal();
-  inicializarHoverCards();
   inicializarVitrine();
 });
 
@@ -42,8 +41,6 @@ async function renderizarCardapio() {
 
   try {
     const produtos = await buscarProdutos()
-    console.log(produtos)
-    console.log(Array.isArray(produtos))
     grid.innerHTML = ""
 
     produtos.dados.forEach((produto) => {
@@ -52,6 +49,7 @@ async function renderizarCardapio() {
       card.setAttribute("data-id", produto.id)
 
       card.innerHTML = 
+        `<img src='${produto.imagem}' alt='${produto.nome}'/>` +
         `<h3>${produto.nome}</h3>` +
         `<p class="desc">${produto.descricao}</p>` +
         `<div class="quantidade-box">` +
@@ -66,6 +64,8 @@ async function renderizarCardapio() {
 
       grid.appendChild(card)
     })
+
+    inicializarHoverCards()
   }
   catch (error) {
     console.error(error);
@@ -73,20 +73,6 @@ async function renderizarCardapio() {
     grid.innerHTML =
       `<p class='loading-error'>${error.message}</p>`;
   }
-}
-
-function inicializarHoverCards() {
-  const cards = document.querySelectorAll(".card");
-  cards.forEach((card) => {
-    card.addEventListener("mouseenter", () => {
-      card.style.transform = "translateY(-5px)";
-      card.style.boxShadow = "0 10px 20px rgba(0,0,0,0.1)";
-    });
-    card.addEventListener("mouseleave", () => {
-      card.style.transform = "translateY(0)";
-      card.style.boxShadow = "none";
-    });
-  });
 }
 
 function inicializarVitrine() {
@@ -130,6 +116,19 @@ function inicializarVitrine() {
   });
 }
 
+function inicializarHoverCards() {
+  const cards = document.querySelectorAll(".card");
+  cards.forEach((card) => {
+    card.addEventListener("mouseenter", () => {
+      card.style.transform = "translateY(-5px)";
+      card.style.boxShadow = "0 10px 20px rgba(0,0,0,0.1)";
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "translateY(0)";
+      card.style.boxShadow = "none";
+    });
+  });
+}
 
 function atualizarPrecoCard(box) {
   const card = box.parentElement;
@@ -138,43 +137,59 @@ function atualizarPrecoCard(box) {
   const quantidade = Number(box.querySelector(".qtd-valor").textContent);
   const total = precoUnitario * quantidade;
 
-  spanPreco.textContent = "R$" + Number(total.toFixed(2).replace(".", ","));
+  spanPreco.textContent = "R$ " + total.toFixed(2).replace(".", ",");
   spanPreco.style.color = total > 150 ? "#c0392b" : "#e67e22";
 }
 
-function salvarPedido(pedido){
-  const lista = JSON.parse(localStorage.getItem("techfood_pedidos") || "[]")
+function salvarPedido(produtoId, quantidade, botao) {
+  const card    = botao.parentElement;
+  const nome    = card.querySelector("h3").textContent;
+  const preco   = parseFloat(card.querySelector(".preco").getAttribute("data-preco"));
+  const subtotal = preco * quantidade;
 
-  pedido.subtotal = pedido.preco * pedido.qtd
-  lista.push(pedido)
+  // Padrão Aula 8: ler → modificar → salvar
+  const lista = JSON.parse(localStorage.getItem("techfood_pedidos") || "[]");
+  lista.push({
+    produto_id: produtoId,  // ⚠ novo em Aula 9 — usado pelo criarPedido()
+    quantidade,             // ⚠ renomeado de qtd para quantidade (formato API)
+    nome,
+    preco,
+    subtotal,
+  });
+  localStorage.setItem("techfood_pedidos", JSON.stringify(lista));
 
-  localStorage.setItem("techfood_pedidos", JSON.stringify(lista))
+  // Feedback visual — igual Aula 8
+  botao.textContent           = "✓ Adicionado!";
+  botao.style.backgroundColor = "#27ae60";
+
+  atualizarContadorPedidos();
+
+  setTimeout(function () {
+    botao.textContent           = "Pedir Agora";
+    botao.style.backgroundColor = "";
+    botao.disabled              = false;
+
+    const box = card.querySelector(".quantidade-box");
+    if (box) {
+      box.querySelector(".qtd-valor").textContent = "1";
+      atualizarPrecoCard(box);
+    }
+  }, 1500);
 }
 
-function atualizarContadorPedidos(){
-  const lista = JSON.parse(localStorage.getItem("techfood_pedidos") || "[]")
-  const total = lista.reduce(function(acc, p) {return acc + p.qtd}, 0)
+function atualizarContadorPedidos() {
+  const lista = JSON.parse(localStorage.getItem("techfood_pedidos") || "[]");
+  const total = lista.reduce(function (acc, p) { return acc + p.quantidade; }, 0);
 
-  const linkMenu = document.querySelector("#menu a[href='pedidos.html']")
+  const linkMenu = document.querySelector("#menu a[href='pedidos.html']");
+  if (!linkMenu) return;
 
-  if (!linkMenu) return
-
-  let badge = linkMenu.querySelector(".badge-menu")
-
+  let badge = linkMenu.querySelector(".badge-menu");
   if (!badge) {
-    linkMenu.insertAdjacentHTML("beforeend", "<span class='badge-menu'>0</span>")
-
-    badge = linkMenu.querySelector(".badge-menu")
+    linkMenu.insertAdjacentHTML("beforeend", "<span class='badge-menu'>0</span>");
+    badge = linkMenu.querySelector(".badge-menu");
   }
 
-  badge.textContent = total
-  linkMenu.classList.add("menu-ativo")
-}
-
-
-
-
-// É funcionalidade NOVA (Apenas Visual)
-function exibirLinkPedidos(){
-  // Continua...
+  badge.textContent = total;
+  linkMenu.classList.add("menu-ativo");
 }
