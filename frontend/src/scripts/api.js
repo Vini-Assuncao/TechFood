@@ -1,85 +1,87 @@
 const BATE_API_URL = "http://localhost:3000"
 
-async function buscarProdutos() {
-    const response = await fetch(`${BATE_API_URL}/produtos`)
-    const dados = await response.json()
+function obterToken() {
+    return localStorage.getItem("techfood_token")
+}
+
+function headersAutenticados() {
+    const headers = { "Content-Type": "application/json" }
+    const token = obterToken()
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`
+    }
+
+    return headers
+}
+
+async function requisicao(url, opcoes = {}) {
+    const response = await fetch(`${BATE_API_URL}${url}`, {
+        ...opcoes,
+        headers: {
+            ...headersAutenticados(),
+            ...(opcoes.headers || {})
+        }
+    })
+
+    const dados = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-        throw new Error(dados.erro || `Erro ${response.status}`)
+        throw new Error(dados.mensagem || dados.erro || `Erro ${response.status}`)
     }
-    
+
     return dados
+}
+
+async function registrarUsuario(usuario) {
+    return requisicao("/usuarios/registrar", {
+        method: "POST",
+        body: JSON.stringify(usuario)
+    })
+}
+
+async function fazerLogin(email, senha) {
+    return requisicao("/usuarios/login", {
+        method: "POST",
+        body: JSON.stringify({ email, senha })
+    })
+}
+
+function encerrarSessao() {
+    localStorage.removeItem("techfood_token")
+    localStorage.removeItem("techfood_usuario")
+    window.location.href = "login.html"
+}
+
+async function buscarProdutos() {
+    return requisicao("/produtos")
 }
 
 async function criarPedido(cliente, itens) {
-   const response = await fetch(`${BATE_API_URL}/pedidos`, {
+    return requisicao("/pedidos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cliente, itens })
     })
-
-    const dados = await response.json()
-
-    if (!response.ok) {
-        throw new Error(dados.erro || `Erro ${response.status}`)
-    }
-    
-    return dados
 }
 
 async function buscarPedidos() {
-    const response = await fetch(`${BATE_API_URL}/pedidos`)
-    const dados = await response.json()
-
-    if (!response.ok) {
-        throw new Error(dados.erro || `Erro ${response.status}`)
-    }
-
-    return dados
+    return requisicao("/pedidos")
 }
 
 async function deletarPedido(id) {
-    const response = await fetch(`${BATE_API_URL}/pedidos/${id}`, {
-        method: "DELETE"
-    })
-
-    const dados = await response.json()
-
-    if (!response.ok) {
-        throw new Error(dados.erro || `Erro ${response.status}`)
-    }
-
-    return dados
+    return requisicao(`/pedidos/${id}`, { method: "DELETE" })
 }
 
 async function atualizarPedido(id, novoStatus) {
-    const response = await fetch(`${BATE_API_URL}/pedidos/${id}`, {
+    return requisicao(`/pedidos/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: novoStatus })
     })
-
-    const dados = await response.json()
-
-    if (!response.ok) {
-        throw new Error(dados.erro || `Erro ${response.status}`)
-    }
-
-    return dados
 }
 
 async function cadastrarProduto(produto) {
-    const response = await fetch(`${BATE_API_URL}/produtos`, {
+    return requisicao("/produtos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(produto)
     })
-
-    const dados = await response.json()
-
-    if (!response.ok) {
-        throw new Error(dados.erro || `Erro ${response.status}`)
-    }
-    
-    return dados
 }

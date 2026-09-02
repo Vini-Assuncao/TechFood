@@ -5,6 +5,24 @@ document.addEventListener("DOMContentLoaded", () => {
     fecharMenuAoNavegar()
 })
 
+function exigirAutenticacao() {
+    const pagina = window.location.pathname.split("/").pop()
+    const paginasProtegidas = ["pedidos.html", "cadastro.html"]
+
+    if (paginasProtegidas.includes(pagina) &&
+        !localStorage.getItem("techfood_token")) {
+        window.location.href = "login.html"
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    exigirAutenticacao()
+    solicitarNomeCliente()
+    exibirNomeCliente()
+    exibirDataFooter()
+    fecharMenuAoNavegar()
+})
+
 function solicitarNomeCliente() {
     if (sessionStorage.getItem("techfood_cliente")) return
 
@@ -83,3 +101,13 @@ function fecharMenuAoNavegar() {
     })
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const botaoSair = document.querySelector("#btn-sair")
+
+    if (botaoSair) {
+        botaoSair.addEventListener("click", (event) => {
+            event.preventDefault()
+            encerrarSessao()
+        })
+    }
+})

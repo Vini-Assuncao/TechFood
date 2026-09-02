@@ -1,0 +1,72 @@
+body {
+  min-height: 100vh;
+  background: #f5f6f7;
+}
+
+.secao-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card-auth {
+  width: 100%;
+  max-width: 380px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .08);
+}
+
+.card-auth h1,
+.card-auth h2 {
+  text-align: center;
+  color: var(--cor-primaria);
+  margin-bottom: 18px;
+}
+
+.card-auth label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: bold;
+  color: var(--cor-primaria);
+}
+
+.card-auth input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.btn-auth {
+  width: 100%;
+  margin: 20px 0 14px;
+  padding: 13px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--cor-destaque);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-auth:disabled {
+  opacity: .6;
+}
+
+.card-auth a {
+  display: block;
+  text-align: center;
+  color: var(--cor-destaque);
+}
+
+.mensagem-auth {
+  min-height: 20px;
+  margin-top: 12px;
+  color: var(--cor-vermelho);
+  text-align: center;
+}

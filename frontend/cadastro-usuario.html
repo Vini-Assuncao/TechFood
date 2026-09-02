@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="src/styles/global.css">
+  <link rel="stylesheet" href="src/styles/auth.css">
+  <title>Criar conta - TechFood</title>
+</head>
+<body>
+  <main class="secao-auth">
+    <form id="form-cadastro-usuario" class="card-auth">
+      <h1>TechFood</h1>
+      <h2>Criar conta</h2>
+
+      <label for="nome">Nome</label>
+      <input id="nome" type="text" required>
+
+      <label for="email">E-mail</label>
+      <input id="email" type="email" required>
+
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" minlength="6" required>
+
+      <p id="mensagem-auth" class="mensagem-auth"></p>
+
+      <button type="submit" class="btn-auth">Cadastrar</button>
+      <a href="login.html">Já tenho uma conta</a>
+    </form>
+  </main>
+
+  <script src="src/scripts/api.js"></script>
+  <script src="src/scripts/cadastro-usuario.js"></script>
+</body>
+</html>
